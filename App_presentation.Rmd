@@ -1,0 +1,66 @@
+---
+title: 'OzoneModel: one easy App for ozone level prediction'
+author: "Alberto L Gallotti"
+date: "5/17/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+library(datasets)
+```
+
+## What's OzoneModel
+
+This is a very quick introduction to "**OzoneModel**", a very straightforward App
+to generate a model predicting atmospheric ozone levels, based on the observations
+taken in the summer months of 1973.
+
+
+## The dataset
+
+The dataset on which the analyses are conducted is the *airquality dataset*, embedded in R. It consists of 6 columns which contain
+
+- the ozone levels
+- the measurments of 3 other variables influencing ozone levels, i.e. Solar radiation (lang), Wind speed (mph), Temperature (°F)
+- the id for month (from May to September) and day
+
+```{r, echo=FALSE}
+kable(head(airquality,4))
+```
+
+
+## The commands
+
+The App asks the operator to select with a slider the month or months to consider
+in order to predict the model, and to check the boxes for at least 1 to all 3 predictors (Solar radiation, Wind speed and Temperature) to insert in the model
+
+The app also generates a timeline graph showing the levels of ozone in the months
+selected (NA values are represented as interruption in the timeline)
+
+```{r, echo = FALSE, fig.height=3, fig.width=8}
+airquality$Date<-paste(airquality$Day,airquality$Month,'1973', sep = '-')
+airquality$Date<-as.Date(airquality$Date, format = '%d-%m-%Y')
+gg<-ggplot(airquality, aes(x=Date, y=Ozone))+geom_line(color='green')+
+      ylab('Ozone Levels')+theme_dark()
+gg
+```
+
+## The model
+
+Once selected the months to consider and which predictor/predictors to use in generating the linear model, the App returns the coefficients for the Intercept
+and each predictor selected, after having trained a linear model to predict ozone levels.
+
+In this example, we show the output for a model considering *Solar Radiation* and
+*Temperature* in the months of August and September.
+
+```{r, echo=FALSE, comment=''}
+monthsconsidered<-c(8,9)
+ozonedf<-filter(airquality,airquality$Month%in%monthsconsidered)
+fit<-lm(Ozone~Solar.R+Temp, data = ozonedf)
+fit$coef
+```
+
